@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SecurityLibrary
 {
-    /*sdfdsfsfsfsfsdfdsfsdfdsdfdsfsdfsdf*/
+    /*sdfdsfsfsfsfs*/
     public class RepeatingkeyVigenere : ICryptographicTechnique<string, string>
     {
         public string Analyse(string plainText, string cipherText)
