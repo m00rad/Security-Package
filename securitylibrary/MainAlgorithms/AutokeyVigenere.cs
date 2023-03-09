@@ -84,6 +84,8 @@ namespace SecurityLibrary
 
         public string Encrypt(string plainText, string key)
         {
+            plainText = plainText.ToLower();
+            key = key.ToLower();
             string cipherText = "";
             char[] alphabets = { 'a', 'b', 'c', 'd', 'e', 'f', 'g','h','i', 'j', 'k', 'l', 'm', 'n', 'o', 'p','q'
             ,'r','s','t','u','v','w','x','y','z'};
@@ -92,12 +94,26 @@ namespace SecurityLibrary
             {
                 key = key + plainText.Substring(0, plainText.Length - key.Length);
             }
-            for (int i = 0; i < plainText.Length; i++)
+            for (int i = 0; i < key.Length; i++)
             {
-                int pi = Array.IndexOf(alphabets, plainText[i]);
-                int ki = Array.IndexOf(alphabets, key[i]);
-                int ci = (pi + ki) % 26;
-                cipherText += alphabets[ci];
+                int z = 0;
+
+                for (int j = Array.IndexOf(alphabets, plainText[i]); j < alphabets.Length; j++)
+                {
+                    if (alphabets[z] == key[i])
+                    {
+                        cipherText += alphabets[j];
+                        break;
+                    }
+                    if (j == 25)
+                    {
+                        j = -1;
+                        z++;
+                        continue;
+                    }
+                    z++;
+                }
+
             }
             return cipherText;
         }
