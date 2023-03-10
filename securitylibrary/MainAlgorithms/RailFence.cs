@@ -10,58 +10,39 @@ namespace SecurityLibrary
     {
         public int Analyse(string plainText, string cipherText)
         {
-            //  throw new NotImplementedException();
-            int key = 0;
-
-            return key;
-        }
-
-        public string Decrypt(string cipherText, int key)
-        {
-            // throw new NotImplementedException();
-            string plainText = "";
-            double row, column = 0;
-            column = key; // 7 columns
-            row = Math.Ceiling(cipherText.Length / column); //25/7 = 3.5 ~ 3 
-            char[,] matrix = new char[(int)row, (int)column];
-            int k = 0;
-
-            for (int i = 0; i < column; i++)
+            string test;
+            int key = -1;
+            for (int i = 1; i < plainText.Length; i++)
             {
-                for (int j = 0; j < row && k < cipherText.Length; j++)
+                test = Encrypt(plainText, i);
+                if (test.Equals(cipherText))
                 {
-                    matrix[j, i] = cipherText[k];
-                    k++;
+                    key = i;
+                    return key;
+
                 }
 
             }
+            return key;
+        }
+        public string Decrypt(string cipherText, int key)
+        {
+            string plainText = "";
+            double row, column = 0;
+            row = key;
+            column = Math.Ceiling(cipherText.Length / row);
+            char[,] matrix = new char[(int)row, (int)column];
+            int k = 0;
 
             for (int i = 0; i < row; i++)
             {
                 for (int j = 0; j < column; j++)
                 {
-                    plainText += Char.ToUpper(matrix[i, j]);
-                }
-            }
-            return plainText;
-        }
-
-        public string Encrypt(string plainText, int key)
-        {
-            //throw new NotImplementedException();
-            string cipherText = "";
-            double row, column = 0;
-            column = key; // 7 columns
-
-            row = Math.Ceiling(plainText.Length / column); //25/7 = 3.5 ~ 3 
-            char[,] matrix = new char[(int)row, (int)column];
-            int k = 0;
-            for (int i = 0; i < row; i++)
-            {
-                for (int j = 0; j < column && k < plainText.Length; j++)
-                {
-                    matrix[i, j] = plainText[k];
-                    k++;
+                    if (k < cipherText.Length)
+                    {
+                        matrix[i, j] = cipherText[k];
+                        k++;
+                    }
                 }
             }
 
@@ -69,10 +50,42 @@ namespace SecurityLibrary
             {
                 for (int j = 0; j < row; j++)
                 {
-                    cipherText += Char.ToUpper(matrix[j, i]);
+                    plainText += Char.ToLower(matrix[j, i]);
+                }
+            }
+            return plainText;
+        }
+        public string Encrypt(string plainText, int key)
+        {
+            string cipherText = "";
+            double row, column = 0;
+            row = key; 
+            column = Math.Ceiling(plainText.Length / row); 
+            char[,] matrix = new char[(int)row, (int)column];
+            int k = 0;
+            for (int i = 0; i < column; i++)
+            {
+                for (int j = 0; j < row; j++)
+                {
+                    if (k >= plainText.Length)
+                        matrix[j, i] = 'X';
+                    else
+                        matrix[j, i] = plainText[k];
+                    k++;
+                }
+            }
+            for (int i = 0; i < row; i++)
+            {
+                for (int j = 0; j < column; j++)
+                {
+                    if (Char.ToUpper(matrix[i, j]) == 'X')
+                        continue;
+                    else
+                        cipherText += Char.ToUpper(matrix[i, j]);
                 }
             }
             return cipherText;
         }
+
     }
 }
