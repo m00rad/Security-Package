@@ -10,10 +10,11 @@ namespace SecurityLibrary
     {
         public List<int> Analyse(string plainText, string cipherText)
         {
-            // throw new NotImplementedException();
-            List<int> key = new List<int>();
-
-            return key;
+            
+            List<int> keyList = new List<int>();
+            int size = GetKeySize(plainText, cipherText);
+            keyList = ArrangeKeyList(plainText, cipherText, size);
+            return keyList;
         }
 
         public string Decrypt(string cipherText, List<int> key)
@@ -87,6 +88,82 @@ namespace SecurityLibrary
                 }
             }
             return cipherText;
+        }
+      
+        public int GetKeySize(string plainText, string cipherText)
+        {
+            cipherText = cipherText.ToUpper();
+            plainText = plainText.ToLower();
+            Console.WriteLine("\t \t In GetKeySize ");
+            double Row, Column;
+            int index, LetterIndex, KeySize = -1;
+            string SubStr = "";
+            for (int i = 2; i <= plainText.Length; i++)
+            {
+                Console.WriteLine("Iterator {0}", i - 1);
+                Console.WriteLine(cipherText);
+                Column = i;
+                Row = Math.Ceiling(cipherText.Length / Column);
+                for (int k = 0; k < (int)Row; k++)
+                {
+                    LetterIndex = k * (int)Column;
+                    if (LetterIndex >= plainText.Length)
+                        SubStr += "X";
+                    else
+                        SubStr += plainText[LetterIndex];
+                }
+                SubStr = SubStr.ToUpper();
+                Console.WriteLine("SubStr : {0}", SubStr);
+
+                index = cipherText.IndexOf(SubStr);
+                Console.WriteLine("index : {0}", index);
+
+                if (index != -1)
+                {
+                    KeySize = i;
+                    return KeySize;
+                }
+                else
+                    SubStr = "";
+            }
+            Console.WriteLine("\t Key Size : {0}", KeySize);
+
+            return KeySize;
+        }
+        public List<int> ArrangeKeyList(string plainText, string cipherText, int KeySize)
+        {
+            cipherText = cipherText.ToUpper();
+            plainText = plainText.ToLower();
+            Console.WriteLine("\t \t In ArrangeKeyList ");
+            Console.WriteLine("\t \t {0}", cipherText);
+            List<int> KeyList = new List<int>();
+            double Row, Column;
+            int index, LetterIndex, term = 0;
+            string SubStr = "";
+            Column = KeySize;
+            Row = Math.Ceiling(cipherText.Length / Column);
+            
+            for (int i = 0; i < Column; i++)
+            {
+                for (int k = 0; k < (int)Row; k++)
+                {
+                    LetterIndex = (k * (int)Column) + i;
+                    if (LetterIndex >= plainText.Length)
+                    {
+                        term++;
+                        continue;
+                    }
+                    else
+                        SubStr += plainText[LetterIndex];
+                }
+                SubStr = SubStr.ToUpper();
+                index = cipherText.IndexOf(SubStr);
+                KeyList.Add(((index + term) / (int)Row) + 1);
+                Console.Write("  {0}\t{1}  ", SubStr, index);
+                SubStr = "";
+            }
+            Console.WriteLine();
+            return KeyList;
         }
     }
 }
