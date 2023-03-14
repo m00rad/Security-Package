@@ -24,13 +24,11 @@ namespace SecurityLibrary
         public string Analyse(string plainText, string cipherText)
         {
             List<int> z = new List<int>();
-            int plain;
             string key = "";
-            string list = "";
             List<char> x = plainText.Distinct().ToList();
             List<char> y = cipherText.ToLower().Distinct().ToList();
 
-            SortedDictionary<char, char> test = new SortedDictionary<char, char>();//(plaintext,cypher)
+            SortedDictionary<char, char> test = new SortedDictionary<char, char>();
 
             string CIPHERText = cipherText.ToLower();
             for (int i = 0; i < x.Count; i++)
@@ -40,7 +38,6 @@ namespace SecurityLibrary
                     if (x[i] == alpha[j])
                     {
                         test.Add(x[i], y[i]);
-                        //    key += y[i];
                     }
                 }
             }

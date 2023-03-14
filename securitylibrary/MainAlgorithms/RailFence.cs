@@ -11,19 +11,13 @@ namespace SecurityLibrary
         public int Analyse(string plainText, string cipherText)
         {
             string test;
-            int key = -1;
-            for (int i = 1; i < plainText.Length; i++)
+            for (int key = 1; key < plainText.Length; key++)
             {
-                test = Encrypt(plainText, i);
+                test = Encrypt(plainText, key);
                 if (test.Equals(cipherText))
-                {
-                    key = i;
-                    return key;
-
-                }
-
+                     return key;
             }
-            return key;
+            return -1;
         }
         public string Decrypt(string cipherText, int key)
         {
