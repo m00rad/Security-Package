@@ -13,7 +13,8 @@ namespace SecurityLibrary
     {
         public List<int> Analyse(List<int> plainText, List<int> cipherText)
         {
-            throw new NotImplementedException();
+            
+            return null;
         }
 
 
@@ -21,19 +22,7 @@ namespace SecurityLibrary
         {
             int arr_sqrt = (int)Math.Sqrt(key.Count);
             List<int> key_inv = new List<int>();
-            int[,] key_arr = convert2_arr(key,arr_sqrt);
-            int det = calc_det(key_arr,arr_sqrt);
-            if (arr_sqrt == 2)
-            {
-                key_inv = calc_k_2d_inverse(key_arr,det);
-            }
-            else
-            {
-                int c = calc_c(det);
-                int b = 26 - c;
-                int[,] adj = calc_adj(key_arr, arr_sqrt);
-                key_inv = calc_k_inverse(adj, b, arr_sqrt);
-            }
+            key_inv = calc_inverse(key);
             List<int> decrypted_list = Encrypt(cipherText, key_inv); 
 
            return decrypted_list;
@@ -75,7 +64,19 @@ namespace SecurityLibrary
 
         public List<int> Analyse3By3Key(List<int> plainText, List<int> cipherText)
         {
-            throw new NotImplementedException();
+            List<int> plain_inv = calc_inverse(plainText);
+            List<int> cipher_t = matrix_t(convert2_arr(cipherText, (int)Math.Sqrt(cipherText.Count)));
+            List<int> key = Encrypt(cipher_t, plain_inv);
+            return key;
+        }
+        public void ShowList(List<int> list, string text = "")
+        {
+            Console.Write("{0} List : \t", text);
+            for (int i = 0; i < list.Count; i++)
+            {
+                Console.Write("{0} \t", list.ElementAt(i));
+            }
+            Console.WriteLine();
         }
         public int[,] convert2_arr(List<int>list,int sqrt)
         {
@@ -131,32 +132,39 @@ namespace SecurityLibrary
 
             return adj;
         }
-        public List<int>calc_k_inverse(int[,] arr,int b,int arr_sqrt)
+        public List<int>calc_inverse(List<int>list)
         {
             List<int> arr_inv = new List<int>();
-            for (int i = 0; i < arr_sqrt; i++)
+            int sqrt = (int)Math.Sqrt(list.Count);
+            int[,] arr = convert2_arr(list,sqrt);
+            int det = calc_det(arr,sqrt);
+            if (sqrt == 2)
             {
-                for(int j = 0; j < arr_sqrt; j++)
+                int temp = 0;
+                temp = arr[0, 0];
+                arr[0, 0] = arr[1, 1];
+                arr[1, 1] = temp;
+                arr[0, 1] = -1 * arr[0, 1];
+                arr[1, 0] = -1 * arr[1, 0];
+                for (int i = 0; i < 2; i++)
                 {
-                    arr_inv.Add(calc_mod((b * arr[i, j]), 26));
+                    for (int j = 0; j < 2; j++)
+                    {
+                        arr_inv.Add(arr[i, j] / det);
+                    }
                 }
             }
-            return arr_inv;
-        }
-        public List<int> calc_k_2d_inverse(int[,]arr,int det)
-        {
-            List<int> arr_inv = new List<int>();
-            int temp = 0;
-            temp = arr[0, 0];
-            arr[0, 0] = arr[1, 1];
-            arr[1, 1] = temp;
-            arr[0, 1] = -1 * arr[0, 1];
-            arr[1, 0] = -1 * arr[1, 0];
-            for(int i = 0; i < 2; i++)
+            else
             {
-                for(int j = 0; j < 2; j++)
+                int c = calc_c(det);
+                int b = 26 - c;
+                int[,] adj = calc_adj(arr, sqrt);
+                for (int i = 0; i < sqrt; i++)
                 {
-                    arr_inv.Add( arr[i, j] / det);
+                    for (int j = 0; j < sqrt; j++)
+                    {
+                        arr_inv.Add(calc_mod((b * adj[i, j]), 26));
+                    }
                 }
             }
             return arr_inv;
@@ -183,6 +191,18 @@ namespace SecurityLibrary
             {
                 return (n - ((-1)*num % n));
             }
+        }
+        public List<int> matrix_t (int[,] arr)
+        {
+            List<int> list = new List<int>();
+            for(int i = 0; i < 3; i++)
+            {
+                for(int j = 0; j < 3; j++)
+                {
+                    list.Add(arr[j,i]);
+                }
+            }
+            return list;
         }
 
     }
