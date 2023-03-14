@@ -13,11 +13,48 @@ namespace SecurityLibrary
     {
         public List<int> Analyse(List<int> plainText, List<int> cipherText)
         {
-            
-            return null;
+            if (plainText.Count <= 4 || cipherText.Count <= 4)
+            {
+                throw new InvalidAnlysisException();
+            }
+            List<int> returned_cipher = new List<int>(), temp_PlainText = new List<int>(plainText), key = new List<int>();
+            bool Check = false;
+            for (int i = 25; i > 0; i--)
+            {
+                for (int j = 25; j > 0; j--)
+                {
+                    for (int x = 25; x > 0; x--)
+                    {
+                        for (int y = 25; y > 0; y--)
+                        {
+                            key.Add(i);
+                            key.Add(j);
+                            key.Add(x);
+                            key.Add(y);
+                            returned_cipher = Encrypt(temp_PlainText, key);
+                            for (int z = 0; z < cipherText.Count; z++)
+                            {
+                                if (returned_cipher[z] != cipherText[z])
+                                {
+                                    Check = false;
+                                    break;
+                                }
+                                else
+                                    Check = true;
+                            }
+                            if (Check == true)
+                                return key;
+                            else
+                            {
+                                temp_PlainText = new List<int>(plainText);
+                                key.Clear();
+                            }
+                        }
+                    }
+                }
+            }
+            return key;
         }
-
-
         public List<int> Decrypt(List<int> cipherText, List<int> key)
         {
             int arr_sqrt = (int)Math.Sqrt(key.Count);
@@ -68,15 +105,6 @@ namespace SecurityLibrary
             List<int> cipher_t = matrix_t(convert2_arr(cipherText, (int)Math.Sqrt(cipherText.Count)));
             List<int> key = Encrypt(cipher_t, plain_inv);
             return key;
-        }
-        public void ShowList(List<int> list, string text = "")
-        {
-            Console.Write("{0} List : \t", text);
-            for (int i = 0; i < list.Count; i++)
-            {
-                Console.Write("{0} \t", list.ElementAt(i));
-            }
-            Console.WriteLine();
         }
         public int[,] convert2_arr(List<int>list,int sqrt)
         {
@@ -152,6 +180,18 @@ namespace SecurityLibrary
                     {
                         arr_inv.Add(arr[i, j] / det);
                     }
+                }
+                int check_zeroes = 0;
+                for(int i = 0; i < arr_inv.Count; i++)
+                {
+                    if (arr_inv[i] == 0)
+                    {
+                        check_zeroes++;
+                    }
+                }
+                if (check_zeroes == 4)
+                {
+                    throw new Exception();
                 }
             }
             else
