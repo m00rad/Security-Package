@@ -115,32 +115,46 @@ namespace SecurityLibrary.DES
           
         public override string Decrypt(string cipherText, string key)
         {
-            throw new NotImplementedException();
+            string plainText = ApplyDes(cipherText, key, false);
+            return plainText;
         }
 
         public override string Encrypt(string plainText, string key)
         {
-             keys = new List<string>();
-             keys_withPerm = new List<string>();
-        //throw new NotImplementedException();
+            return ApplyDes(plainText, key,true);
+        }
+        public static string ApplyDes(string plainText, string key, bool Type)
+        {
+            keys = new List<string>();
+            keys_withPerm = new List<string>();
             key = convert2binary(key);
-            key = permutation(key, pc_1);
+            key = Apply_Permutation(key, pc_1);
 
-            List<char> C0 = key.Substring(0,28).ToList<char>();
-            List<char> D0 = key.Substring(28,28).ToList<char>();
+            List<char> C0 = key.Substring(0, 28).ToList<char>();
+            List<char> D0 = key.Substring(28, 28).ToList<char>();
             List<List<char>> C = generate_half_keys(C0);
             List<List<char>> D = generate_half_keys(D0);
-            concatenate_keys(C, D,0);
+            concatenate_keys(C, D, 0);
             int len = keys[0].Length;
             int len1 = keys_withPerm[0].Length;
             string M = convert2binary(plainText);
-            string ip = permutation(M, IP);
+            string ip = Apply_Permutation(M, IP);
             string L0 = ip.Substring(0, 32);
             string R0 = ip.Substring(32, 32);
-            string ipinverse = permutation(encode_message(L0, R0),ipInverse);
-            
-            return  "0x"+Convert.ToString(Convert.ToInt64(ipinverse.ToString(), 2), 16).PadLeft(4, '0').ToUpper();
+            string ipinverse;
+            if (Type)
+            {
+                ipinverse = Apply_Permutation(encode_message(L0, R0, Type, 0), ipInverse);
+            }
+            else
+            {
+                ipinverse = Apply_Permutation(encode_message(L0, R0, Type, 15), ipInverse);
+            }
+            string Text = Convert.ToString(Convert.ToInt64(ipinverse.ToString(), 2), 16).ToUpper();
+
+            return GetLeadingZeros(Text);
         }
+
         public static string convert2binary(string hex)
         {
             string binary = "";
@@ -160,23 +174,50 @@ namespace SecurityLibrary.DES
             }
             
             return res;
-        } 
-        public static string encode_message(string L0, string R0 ,int rounds=0)
+        }
+
+        public static string GetLeadingZeros(string Hex)
         {
-            string L_new="",R_new=""; 
-            if(rounds==16)
+            if (Hex.Length < 16)
+            {
+                string leadingZeros = "";
+                for (int i = 0; i < 16 - Hex.Length; i++)
+                {
+                    leadingZeros += "0";
+                }
+                Hex = leadingZeros + Hex;
+            }
+            return "0x" + Hex.ToUpper();
+        }
+        public static string encode_message(string L0, string R0 ,bool Type, int rounds = 0)
+        {
+            int RoundCheck , RoundChange;
+            string L_new = "", R_new = "";
+            if (Type)
+            {
+                RoundCheck = 16;
+                RoundChange = 1;
+
+            }
+            else
+            {
+                RoundCheck = -1;
+                RoundChange = -1;
+            }
+            if (rounds == RoundCheck)
             {
                 string result = R0 + L0;
                 return result;
             }
-            R_new = permutation(R0.ToString(),E_BIT);
+            R_new = Apply_Permutation(R0.ToString(), E_BIT);
             L_new = R0.ToString();
             R_new = XOR(keys_withPerm[rounds], R_new);
             R_new = split_parts(R_new);
             R_new = XOR(R_new, L0);
-            return encode_message(L_new, R_new,rounds+1);
+            return encode_message(L_new, R_new, Type, rounds + RoundChange);
+
         }
-        public static string permutation(string key,List<int>pc)
+        public static string Apply_Permutation(string key,List<int>pc)
         {
             string new_key = "";
             for (int i = 0; i < pc.Count; i++)
@@ -229,7 +270,7 @@ namespace SecurityLibrary.DES
                 o = Convert.ToString(Convert.ToInt32(s[i, row_index, col_index].ToString(),10),2).PadLeft(4,'0');
                 res += o;
             }
-            res = permutation(res, p);
+            res = Apply_Permutation(res, p);
             return res;
         }
         public static List<string> concatenate_keys(List<List<char>> C, List<List<char>> D,int counter)
@@ -250,7 +291,7 @@ namespace SecurityLibrary.DES
             }
             counter++;
             keys.Add(key);
-            keys_withPerm.Add(permutation(key, pc_2));
+            keys_withPerm.Add(Apply_Permutation(key, pc_2));
             concatenate_keys(C, D, counter);
             return null;
         }
